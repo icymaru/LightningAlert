@@ -8,7 +8,7 @@ To use this app, provide the file full path and hit Enter. See example below.
     Input the full path of the lightning file:
     C:\lightning.json
 
-    *\<lightning alerts will show here\>*
+    <lightning alerts will show here>
 
 ---
 
