@@ -1,93 +1,93 @@
-﻿using LightningAlert.Dtos;
-using LightningAlert.Enums;
-using LightningAlert.Utils;
 using System;
 using System.IO;
 using System.Text.Json;
+using LightningAlert.Dtos;
+using LightningAlert.Enums;
+using LightningAlert.Utils;
 
 namespace LightningAlert.Receivers
 {
-    public class LightningReceiver
-    {
-        public event EventHandler<LightingReceivedEventArgs> Received;
+	public class LightningReceiver
+	{
+		public event EventHandler<LightingReceivedEventArgs> Received;
 
-        public void Listen()
-        {
-            Console.WriteLine("\nInput the full path of the lightning file:");
-            
-            var path = Console.ReadLine();
+		public void Listen()
+		{
+			Console.WriteLine("\nInput the full path of the lightning file:");
 
-            while (!IsFileValid(path))
-            {
-                Listen();
-            }
+			var path = Console.ReadLine();
 
-            ProcessLightningData(path);
+			while (!IsFileValid(path))
+			{
+				Listen();
+			}
 
-            Listen();
-        }
+			ProcessLightningData(path);
 
-        private void ProcessLightningData(string path)
-        {
-            Console.WriteLine("Start processing...");
+			Listen();
+		}
 
-            using var reader = new StreamReader(path);
+		private void ProcessLightningData(string path)
+		{
+			Console.WriteLine("Start processing...");
 
-            while (reader.Peek() >= 0)
-            {
-                var line = reader.ReadLine();
+			using var reader = new StreamReader(path);
 
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
+			while (reader.Peek() >= 0)
+			{
+				var line = reader.ReadLine();
 
-                try
-                {
-                    var lightning = JsonSerializer.Deserialize<LightningDto>(line, Constants.JsonSerializerOptions);
+				if (string.IsNullOrWhiteSpace(line))
+					continue;
 
-                    if (!IsLightningStrike(lightning.FlashType))
-                        continue;
+				try
+				{
+					var lightning = JsonSerializer.Deserialize<LightningDto>(line, Constants.JsonSerializerOptions);
 
-                    OnReceived(new LightingReceivedEventArgs(lightning));
-                }
-                catch (JsonException) // It will go thru here if "line" is not parsable.
-                {
-                    // Not sure if it's ok to Console.Write this, but for logging purposes lets just do it.
-                    Console.WriteLine($"Invalid lightning data was received.");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Unknown error occured. {ex.Message}");
-                }
-            }
+					if (!IsLightningStrike(lightning.FlashType))
+						continue;
 
-            Console.WriteLine("Done!");
-        }
+					OnReceived(new LightingReceivedEventArgs(lightning));
+				}
+				catch (JsonException) // It will go thru here if "line" is not parsable.
+				{
+					// Not sure if it's ok to Console.Write this, but for logging purposes lets just do it.
+					Console.WriteLine($"Invalid lightning data was received.");
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Unknown error occured. {ex.Message}");
+				}
+			}
 
-        private static bool IsLightningStrike(int flashType)
-        {
-            return flashType == (int)FlashType.CloudToGround || flashType == (int)FlashType.CloudToCloud;
-        }
+			Console.WriteLine("Done!");
+		}
 
-        private static bool IsFileValid(string path)
-        {
-            if (!File.Exists(path))
-            {
-                Console.WriteLine("File doesn't exists.");
-                return false;
-            }
+		private static bool IsLightningStrike(int flashType)
+		{
+			return flashType == (int)FlashType.CloudToGround || flashType == (int)FlashType.CloudToCloud;
+		}
 
-            if (Path.GetExtension(path) != ".json")
-            {
-                Console.WriteLine("Invalid file extension. Please provide a valid JSON file.");
-                return false;
-            }
+		private static bool IsFileValid(string path)
+		{
+			if (!File.Exists(path))
+			{
+				Console.WriteLine("File doesn't exists.");
+				return false;
+			}
 
-            return true;
-        }
+			if (Path.GetExtension(path) != ".json")
+			{
+				Console.WriteLine("Invalid file extension. Please provide a valid JSON file.");
+				return false;
+			}
 
-        private void OnReceived(LightingReceivedEventArgs e)
-        {
-            Received?.Invoke(this, e);
-        }
-    }
+			return true;
+		}
+
+		private void OnReceived(LightingReceivedEventArgs e)
+		{
+			Received?.Invoke(this, e);
+		}
+	}
 }
