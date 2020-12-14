@@ -13,18 +13,23 @@ namespace LightningAlert.Receivers
 
 		public void Listen()
 		{
-			Console.WriteLine("\nInput the full path of the lightning file:");
-
-			var path = Console.ReadLine();
-
-			while (!IsFileValid(path))
-			{
-				Listen();
-			}
+			var path = AskFilePath();
 
 			ProcessLightningData(path);
 
 			Listen();
+		}
+
+		private string AskFilePath()
+		{
+			Console.WriteLine("\nInput the full path of the lightning file:");
+
+			var path = Console.ReadLine();
+
+			if (!IsFileValid(path))
+				path = AskFilePath();
+
+			return path;
 		}
 
 		private void ProcessLightningData(string path)
