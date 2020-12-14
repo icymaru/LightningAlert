@@ -26,10 +26,10 @@ namespace LightningAlert.Receivers
 
 			var path = Console.ReadLine();
 
-			if (!IsFileValid(path))
-				path = AskFilePath();
+			if (IsFileValid(path))
+				return path;
 
-			return path;
+			return AskFilePath();
 		}
 
 		private void ProcessLightningData(string path)
